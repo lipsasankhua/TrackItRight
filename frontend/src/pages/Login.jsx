@@ -55,6 +55,9 @@ function Login() {
             Sign in
           </button>
         </form>
+        <p className="text-center text-xs text-[#8a8171] mt-6">
+  Developed by Lipsa Sankhua · Built during internship at Talking Crooks IT Pvt. Ltd.
+        </p>
       </div>
     </div>
   );

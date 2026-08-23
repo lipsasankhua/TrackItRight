@@ -42,10 +42,14 @@ function Sidebar() {
       </nav>
 
       <div className="mt-auto px-2 pt-6 border-t border-[#2a4d38]">
-        <p className="text-[10px] text-[#8ca592] leading-relaxed">
-          Every request, timestamped and proven.
-        </p>
-      </div>
+  <p className="text-[10px] text-[#8ca592] leading-relaxed mb-2">
+    Every request, timestamped and proven.
+  </p>
+  <p className="text-[10px] text-[#8ca592] leading-relaxed">
+    Developed by Lipsa Sankhua<br />
+    Built during internship at Talking Crooks IT Pvt. Ltd.
+  </p>
+</div>
     </div>
   );
 }
