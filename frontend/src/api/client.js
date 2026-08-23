@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'https://trackitright.onrender.com';
 
 export async function getClients() {
   const res = await fetch(`${BASE_URL}/clients`);
