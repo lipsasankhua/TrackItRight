@@ -30,6 +30,9 @@ app.use('/reports', reportsRouter);
 const PORT = process.env.PORT || 5000;
 
 initDB().then(() => {
+  const { seedIfEmpty } = require('./db/seed');
+  seedIfEmpty();
+
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
