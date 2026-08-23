@@ -7,6 +7,11 @@ const dashboardRouter = require('./routes/dashboard');
 const entriesRouter = require('./routes/entries');
 const unbilledRouter = require('./routes/unbilled');
 const reportsRouter = require('./routes/reports');
+const fs = require('fs');
+const uploadsDir = require('path').join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
 
 const app = express();
 app.use(cors());
