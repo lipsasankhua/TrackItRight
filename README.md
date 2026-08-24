@@ -48,7 +48,7 @@ npm run dev
 ```
 Runs on `http://localhost:5000`. Requires a `.env` file in `backend/`:
 ```
-GROQ_API_KEY=your_key_here
+
 PORT=5000
 ```
 
