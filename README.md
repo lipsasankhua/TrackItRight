@@ -1,5 +1,5 @@
 # TrackItRight
-[Its an ONGOING project and for now i am working on it ml part.]
+[Its an ONGOING project and for now i am working on it's  ml part.]
 
 AI-powered client communication and deadline tracker for service firms — law offices, architecture studios, interior design agencies, and creative agencies.
 
