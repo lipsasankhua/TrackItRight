@@ -1,0 +1,145 @@
+text,label,field
+"Reminder — sprint demo is due on the 27th, please don't miss it.",deadline,software development
+Can you update the run-of-show schedule based on our last call?,task,event planning
+"Client wants an extra revision to the permit application beyond what was agreed, please quote it separately.",extra_work,architecture
+Please submit the social media report by end of day on the 27th.,deadline,marketing agency
+We want to expand the contract clause with additional requirements — please estimate the added cost and timeline.,extra_work,law
+We want to expand the draft agreement with additional requirements — please estimate the added cost and timeline.,extra_work,law
+"The influencer outreach list deadline is September 1st, please plan accordingly.",deadline,marketing agency
+We need to lock in the run-of-show schedule before our meeting on August 26th.,deadline,event planning
+"This wasn't discussed earlier, but can you also handle an additional request related to the vendor agreement?",extra_work,law
+Please share the current version of the database migration for our records.,task,software development
+"Client wants an extra revision to the guest list beyond what was agreed, please quote it separately.",extra_work,event planning
+Can you walk us through the draft agreement in our next call?,task,law
+We'd like you to double-check the sprint demo for accuracy.,task,software development
+Client is expecting the lighting plan no later than September 1st.,deadline,interior design
+Can you update the catering menu based on our last call?,task,event planning
+Please share the current version of the bug fix report for our records.,task,software development
+Please coordinate with the team on the decor mockup this week.,task,event planning
+Please also take care of an unplanned addition to the flooring plan; happy to discuss extra billing for this.,extra_work,interior design
+Please submit the catering menu by end of day on September 1st.,deadline,event planning
+"We'd also like you to add changes to the social media report — this wasn't part of the original scope, please share the additional cost.",extra_work,marketing agency
+Please also take care of an unplanned addition to the construction timeline; happy to discuss extra billing for this.,extra_work,architecture
+"Client wants an extra revision to the site inspection report beyond what was agreed, please quote it separately.",extra_work,architecture
+Can you confirm the contract clause will be delivered by September 1st?,deadline,law
+Please coordinate with the team on the code review this week.,task,software development
+Can you walk us through the permit application in our next call?,task,architecture
+"Client has asked for something extra on the compliance memo that isn't in our original brief, please let us know the cost.",extra_work,law
+"This wasn't discussed earlier, but can you also handle an additional request related to the bug fix report?",extra_work,software development
+"We'd also like you to add changes to the run-of-show schedule — this wasn't part of the original scope, please share the additional cost.",extra_work,event planning
+"This wasn't discussed earlier, but can you also handle an additional request related to the floor plan revision?",extra_work,architecture
+"We'd like an upgrade to the venue layout — separate from what was quoted, please share pricing.",extra_work,event planning
+We'd like you to double-check the brand guidelines for accuracy.,task,marketing agency
+"Reminder — construction timeline is due on September 1st, please don't miss it.",deadline,architecture
+Please make a note of the changes discussed for the ad copy.,task,marketing agency
+Please review the furniture layout and share your feedback.,task,interior design
+Can you update the material samples based on our last call?,task,interior design
+"Client wants an extra revision to the content calendar beyond what was agreed, please quote it separately.",extra_work,marketing agency
+Please submit the venue layout by end of day on September 3rd.,deadline,event planning
+We want to expand the release notes with additional requirements — please estimate the added cost and timeline.,extra_work,software development
+We need a status update on the structural plans.,task,architecture
+Can you update the campaign creatives based on our last call?,task,marketing agency
+"The case brief deadline is August 30th, please plan accordingly.",deadline,law
+Can you also prepare a second version of the decor mockup? This is outside our original agreement.,extra_work,event planning
+We need the ad copy finalized before September 2nd.,deadline,marketing agency
+"Reminder — SEO audit is due on August 26th, please don't miss it.",deadline,marketing agency
+We need a status update on the settlement letter.,task,law
+"The brand guidelines deadline is September 5th, please plan accordingly.",deadline,marketing agency
+Can you update the invitation design based on our last call?,task,event planning
+"Client wants an extra revision to the material specifications beyond what was agreed, please quote it separately.",extra_work,architecture
+Please coordinate with the team on the vendor agreement this week.,task,law
+Can you walk us through the site inspection report in our next call?,task,architecture
+We want to expand the material samples with additional requirements — please estimate the added cost and timeline.,extra_work,interior design
+We need the database migration finalized before September 1st.,deadline,software development
+Client is expecting the test coverage report no later than August 26th.,deadline,software development
+We need to lock in the elevation drawings before our meeting on September 3rd.,deadline,architecture
+"We'd like an upgrade to the lighting plan — separate from what was quoted, please share pricing.",extra_work,interior design
+We need the guest list finalized before August 26th.,deadline,event planning
+Can you update the NDA review based on our last call?,task,law
+Please make a note of the changes discussed for the guest list.,task,event planning
+We'd like you to double-check the influencer outreach list for accuracy.,task,marketing agency
+"Client wants an extra revision to the structural plans beyond what was agreed, please quote it separately.",extra_work,architecture
+Please submit the bug fix report by end of day on September 1st.,deadline,software development
+"Client has asked for something extra on the elevation drawings that isn't in our original brief, please let us know the cost.",extra_work,architecture
+"Client wants an extra revision to the catering menu beyond what was agreed, please quote it separately.",extra_work,event planning
+We need a status update on the compliance memo.,task,law
+"Client has asked for something extra on the mood board that isn't in our original brief, please let us know the cost.",extra_work,interior design
+"Client wants an extra revision to the staging deployment beyond what was agreed, please quote it separately.",extra_work,software development
+"Client wants an extra revision to the ad copy beyond what was agreed, please quote it separately.",extra_work,marketing agency
+Can you update the fixture selection based on our last call?,task,interior design
+"We'd also like you to add changes to the site drawings — this wasn't part of the original scope, please share the additional cost.",extra_work,architecture
+We want to expand the invitation design with additional requirements — please estimate the added cost and timeline.,extra_work,event planning
+Can you confirm the staging deployment will be delivered by August 26th?,deadline,software development
+Client is expecting the flooring plan no later than September 1st.,deadline,interior design
+"Client has asked for something extra on the furniture layout that isn't in our original brief, please let us know the cost.",extra_work,interior design
+We'd like you to double-check the content calendar for accuracy.,task,marketing agency
+"Client wants an extra revision to the NDA review beyond what was agreed, please quote it separately.",extra_work,law
+Please also take care of an unplanned addition to the SEO audit; happy to discuss extra billing for this.,extra_work,marketing agency
+Please share the current version of the material specifications for our records.,task,architecture
+"Reminder — campaign creatives is due on September 5th, please don't miss it.",deadline,marketing agency
+Please have the compliance memo ready by August 30th.,deadline,law
+We want to expand the vendor contracts with additional requirements — please estimate the added cost and timeline.,extra_work,event planning
+"The material specifications deadline is September 3rd, please plan accordingly.",deadline,architecture
+Please also take care of an unplanned addition to the brand guidelines; happy to discuss extra billing for this.,extra_work,marketing agency
+Can you walk us through the social media report in our next call?,task,marketing agency
+"Client wants an extra revision to the court filing beyond what was agreed, please quote it separately.",extra_work,law
+We need a status update on the venue layout.,task,event planning
+Please review the contract clause and share your feedback.,task,law
+"We'd like an upgrade to the 3D render — separate from what was quoted, please share pricing.",extra_work,interior design
+We need the API documentation finalized before the 27th.,deadline,software development
+"Client has asked for something extra on the case brief that isn't in our original brief, please let us know the cost.",extra_work,law
+We'd like you to double-check the flooring plan for accuracy.,task,interior design
+We need a status update on the 3D render.,task,interior design
+Can you walk us through the color palette in our next call?,task,interior design
+"Reminder — seating chart is due on the 27th, please don't miss it.",deadline,event planning
+Please submit the court filing by end of day on August 26th.,deadline,law
+Please share the current version of the staging deployment for our records.,task,software development
+We'd like you to double-check the elevation drawings for accuracy.,task,architecture
+"This wasn't discussed earlier, but can you also handle an additional request related to the email newsletter draft?",extra_work,marketing agency
+Can you also prepare a second version of the API documentation? This is outside our original agreement.,extra_work,software development
+We need the fixture selection finalized before August 26th.,deadline,interior design
+Please make a note of the changes discussed for the email newsletter draft.,task,marketing agency
+"We'd like an upgrade to the campaign creatives — separate from what was quoted, please share pricing.",extra_work,marketing agency
+Please also take care of an unplanned addition to the seating chart; happy to discuss extra billing for this.,extra_work,event planning
+We need to lock in the structural plans before our meeting on August 28th.,deadline,architecture
+We need a status update on the floor plan revision.,task,architecture
+Client is expecting the site drawings no later than September 3rd.,deadline,architecture
+Please submit the invitation design by end of day on September 3rd.,deadline,event planning
+Can you also prepare a second version of the color palette? This is outside our original agreement.,extra_work,interior design
+Please make a note of the changes discussed for the SEO audit.,task,marketing agency
+Please have the content calendar ready by September 2nd.,deadline,marketing agency
+Can you confirm the decor mockup will be delivered by September 1st?,deadline,event planning
+We want to expand the test coverage report with additional requirements — please estimate the added cost and timeline.,extra_work,software development
+Please have the email newsletter draft ready by August 28th.,deadline,marketing agency
+"Client has asked for something extra on the influencer outreach list that isn't in our original brief, please let us know the cost.",extra_work,marketing agency
+Please share the current version of the seating chart for our records.,task,event planning
+Can you confirm the floor plan revision will be delivered by August 28th?,deadline,architecture
+Please coordinate with the team on the lighting plan this week.,task,interior design
+Please have the release notes ready by August 28th.,deadline,software development
+Can you update the API documentation based on our last call?,task,software development
+Please have the site inspection report ready by September 1st.,deadline,architecture
+Please share the current version of the mood board for our records.,task,interior design
+We need the draft agreement finalized before August 26th.,deadline,law
+Please submit the mood board by end of day on September 2nd.,deadline,interior design
+We need the settlement letter finalized before August 28th.,deadline,law
+Please review the court filing and share your feedback.,task,law
+Please share the current version of the test coverage report for our records.,task,software development
+Please have the furniture layout ready by September 1st.,deadline,interior design
+Please also take care of an unplanned addition to the code review; happy to discuss extra billing for this.,extra_work,software development
+Please submit the material samples by end of day on September 2nd.,deadline,interior design
+Can you confirm the vendor contracts will be delivered by September 2nd?,deadline,event planning
+Please coordinate with the team on the vendor contracts this week.,task,event planning
+"This wasn't discussed earlier, but can you also handle an additional request related to the sprint demo?",extra_work,software development
+Client is expecting the permit application no later than September 1st.,deadline,architecture
+We need to lock in the color palette before our meeting on August 30th.,deadline,interior design
+"Client wants an extra revision to the settlement letter beyond what was agreed, please quote it separately.",extra_work,law
+Can you confirm the NDA review will be delivered by August 30th?,deadline,law
+Please submit the vendor agreement by end of day on September 1st.,deadline,law
+Can you walk us through the site drawings in our next call?,task,architecture
+"Client wants an extra revision to the database migration beyond what was agreed, please quote it separately.",extra_work,software development
+Please share the current version of the case brief for our records.,task,law
+Can you confirm the 3D render will be delivered by September 2nd?,deadline,interior design
+Please review the release notes and share your feedback.,task,software development
+Can you also prepare a second version of the fixture selection? This is outside our original agreement.,extra_work,interior design
+We'd like you to double-check the construction timeline for accuracy.,task,architecture
+Please submit the code review by end of day on September 3rd.,deadline,software development
