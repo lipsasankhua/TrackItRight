@@ -7,6 +7,7 @@ const { runQuery, queryAll } = require('../db/db');
 const { extractFromMessage } = require('../services/aiExtraction');
 const { transcribeAudio } = require('../services/transcription');
 const { getEmbedding, cosineSimilarity } = require('../services/embeddings');
+const { getClassifierPrediction } = require('../services/classifierComparison');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
@@ -65,6 +66,7 @@ async function saveMessageAndExtract(client_id, raw_text, source) {
   const message_id = lastMessage[0].id;
 
   const extracted = await extractFromMessage(raw_text);
+  const classifierResult = await getClassifierPrediction(raw_text);
 
   runQuery(
     `INSERT INTO entries (message_id, client_id, entry_type, summary, due_date, billed, estimated_value)
@@ -80,7 +82,7 @@ async function saveMessageAndExtract(client_id, raw_text, source) {
     ]
   );
 
-  return { extracted, similarMessages: similar };
+  return { extracted, similarMessages: similar, classifierComparison: classifierResult };
 }
 
 router.post('/', async (req, res) => {

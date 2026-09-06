@@ -5,3 +5,4 @@ node_modules/
 */uploads/
 venv/
 .ipynb_checkpoints/
+__pycache__/
