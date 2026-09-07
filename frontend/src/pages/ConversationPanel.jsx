@@ -8,6 +8,7 @@ function ConversationPanel() {
   const [rawText, setRawText] = useState('');
   const [extracted, setExtracted] = useState(null);
   const [similarMessages, setSimilarMessages] = useState([]);
+  const [classifierComparison, setClassifierComparison] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -37,19 +38,25 @@ function ConversationPanel() {
     loadClients();
   };
 
+  const resetResults = () => {
+    setExtracted(null);
+    setSimilarMessages([]);
+    setClassifierComparison(null);
+    setError(null);
+  };
+
   const handleExtract = async (e) => {
     e.preventDefault();
     if (!selectedClient || !rawText.trim()) return;
 
     setLoading(true);
-    setError(null);
-    setExtracted(null);
-    setSimilarMessages([]);
+    resetResults();
 
     try {
       const result = await addEntry({ client_id: selectedClient.id, raw_text: rawText });
       setExtracted(result.extracted);
       setSimilarMessages(result.similarMessages || []);
+      setClassifierComparison(result.classifierComparison || null);
       setRawText('');
     } catch (err) {
       setError('AI extraction failed. Check the backend terminal for details.');
@@ -63,14 +70,13 @@ function ConversationPanel() {
     if (!file || !selectedClient) return;
 
     setLoading(true);
-    setError(null);
-    setExtracted(null);
-    setSimilarMessages([]);
+    resetResults();
 
     try {
       const result = await addVoiceEntry(selectedClient.id, file);
       setExtracted(result.extracted);
       setSimilarMessages(result.similarMessages || []);
+      setClassifierComparison(result.classifierComparison || null);
     } catch (err) {
       setError('Voice note processing failed. Check the backend terminal for details.');
     } finally {
@@ -78,6 +84,11 @@ function ConversationPanel() {
       e.target.value = '';
     }
   };
+
+  // Normalises 'extra_work' vs 'extra work' style differences before comparing
+  const normalize = (s) => (s || '').toLowerCase().replace(/[\s_-]/g, '');
+  const typesAgree = classifierComparison && extracted &&
+    normalize(classifierComparison.label) === normalize(extracted.entry_type);
 
   return (
     <div className="min-h-screen bg-[#F6F1E4] flex">
@@ -179,34 +190,84 @@ function ConversationPanel() {
             )}
 
             {extracted && (
-              <div className="bg-white border border-[#e8e1cf] rounded-2xl p-5 relative">
-                <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-[#C9A227] flex items-center justify-center rotate-6 shadow-md">
-                  <span className="text-[#1F3D2B] text-[9px] font-semibold" style={{ fontFamily: 'IBM Plex Mono' }}>LOG</span>
-                </div>
-
-                <h3 className="text-sm text-[#6b6355] mb-3">AI extraction result</h3>
-
-                <div className="space-y-2 text-sm">
-                  <p><span className="text-[#6b6355]">Type: </span><span className="text-[#2B2620] font-medium capitalize">{extracted.entry_type?.replace('_', ' ')}</span></p>
-                  <p><span className="text-[#6b6355]">Summary: </span><span className="text-[#2B2620]">{extracted.summary}</span></p>
-                  {extracted.due_date && (
-                    <p><span className="text-[#6b6355]">Due date: </span><span className="text-[#2B2620]" style={{ fontFamily: 'IBM Plex Mono' }}>{extracted.due_date}</span></p>
-                  )}
-                  {extracted.estimated_value && (
-                    <p><span className="text-[#6b6355]">Estimated value: </span><span className="text-[#2B2620]">₹{extracted.estimated_value}</span></p>
-                  )}
-                </div>
-
-                {similarMessages.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-[#f0ebd9]">
-                    <p className="text-xs text-[#6b6355] mb-2">⚠ Possibly related to earlier requests:</p>
-                    {similarMessages.map((m, i) => (
-                      <p key={i} className="text-xs text-[#2B2620] bg-[#F6F1E4] rounded-lg px-3 py-2 mb-1">
-                        "{m.text}" — {Math.round(m.score * 100)}% similar
-                      </p>
-                    ))}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {/* LLM extraction card */}
+                <div className="bg-white border border-[#e8e1cf] rounded-2xl p-5 relative">
+                  <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-[#C9A227] flex items-center justify-center rotate-6 shadow-md">
+                    <span className="text-[#1F3D2B] text-[9px] font-semibold" style={{ fontFamily: 'IBM Plex Mono' }}>LOG</span>
                   </div>
-                )}
+
+                  <h3 className="text-sm text-[#6b6355] mb-1">LLM extraction (Groq)</h3>
+                  <p className="text-[10px] text-[#a89f8d] mb-3">Understands full context, extracts type + summary + date + value</p>
+
+                  <div className="space-y-2 text-sm">
+                    <p><span className="text-[#6b6355]">Type: </span><span className="text-[#2B2620] font-medium capitalize">{extracted.entry_type?.replace('_', ' ')}</span></p>
+                    <p><span className="text-[#6b6355]">Summary: </span><span className="text-[#2B2620]">{extracted.summary}</span></p>
+                    {extracted.due_date && (
+                      <p><span className="text-[#6b6355]">Due date: </span><span className="text-[#2B2620]" style={{ fontFamily: 'IBM Plex Mono' }}>{extracted.due_date}</span></p>
+                    )}
+                    {extracted.estimated_value && (
+                      <p><span className="text-[#6b6355]">Estimated value: </span><span className="text-[#2B2620]">₹{extracted.estimated_value}</span></p>
+                    )}
+                  </div>
+
+                  {similarMessages.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-[#f0ebd9]">
+                      <p className="text-xs text-[#6b6355] mb-2">⚠ Possibly related to earlier requests:</p>
+                      {similarMessages.map((m, i) => (
+                        <p key={i} className="text-xs text-[#2B2620] bg-[#F6F1E4] rounded-lg px-3 py-2 mb-1">
+                          "{m.text}" — {Math.round(m.score * 100)}% similar
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Trained classifier comparison card */}
+                <div className="bg-white border border-[#e8e1cf] rounded-2xl p-5 relative">
+                  <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-[#5B7B8C] flex items-center justify-center rotate-6 shadow-md">
+                    <span className="text-white text-[9px] font-semibold" style={{ fontFamily: 'IBM Plex Mono' }}>ML</span>
+                  </div>
+
+                  <h3 className="text-sm text-[#6b6355] mb-1">Trained classifier (local model)</h3>
+                  <p className="text-[10px] text-[#a89f8d] mb-3">TF-IDF + Logistic Regression, trained on 144 labeled examples</p>
+
+                  {classifierComparison ? (
+                    <>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-[#6b6355] text-sm">Type: </span>
+                        <span className="text-[#2B2620] font-medium capitalize text-sm">{classifierComparison.label?.replace('_', ' ')}</span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${typesAgree ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {typesAgree ? '✓ Agrees with LLM' : '⚠ Differs from LLM'}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-[#6b6355] mb-2">Confidence breakdown:</p>
+                      <div className="space-y-1.5">
+                        {classifierComparison.all_probabilities && Object.entries(classifierComparison.all_probabilities)
+                          .sort((a, b) => b[1] - a[1])
+                          .map(([label, prob]) => (
+                            <div key={label}>
+                              <div className="flex justify-between text-[11px] text-[#6b6355] mb-0.5">
+                                <span className="capitalize">{label.replace('_', ' ')}</span>
+                                <span>{Math.round(prob * 100)}%</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-[#F6F1E4] rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-[#5B7B8C] rounded-full"
+                                  style={{ width: `${prob * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-[#a89f8d] italic">
+                      Classifier service not reachable — start it locally with <code>uvicorn api:app --port 8000</code> to see this comparison.
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </>
