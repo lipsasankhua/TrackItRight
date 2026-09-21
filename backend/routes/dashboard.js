@@ -12,6 +12,7 @@ router.get('/', (req, res) => {
       JOIN clients ON entries.client_id = clients.id
       WHERE entries.entry_type = 'deadline'
         AND entries.due_date IS NOT NULL
+        AND entries.completed = 0
         AND date(entries.due_date) BETWEEN date('now') AND date('now', '+7 days')
       ORDER BY entries.due_date ASC
     `);

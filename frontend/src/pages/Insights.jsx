@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { getInsights } from '../api/client';
-import { TrendingUp, AlertTriangle, Users } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Users, CheckCircle2 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from 'recharts';
 
-const STATUS_COLORS = { overdue: '#A6543A', upcoming: '#5B7B8C' };
+const STATUS_COLORS = { overdue: '#A6543A', upcoming: '#5B7B8C', completed: '#2a4d38' };
 
 function Insights() {
   const [data, setData] = useState(null);
@@ -27,7 +27,15 @@ function Insights() {
     ? [
         { key: 'overdue', label: 'Overdue', count: data.deadlineStatus.overdue },
         { key: 'upcoming', label: 'Upcoming', count: data.deadlineStatus.upcoming },
+        { key: 'completed', label: 'Completed', count: data.deadlineStatus.completed },
       ].filter((s) => s.count > 0)
+    : [];
+
+  const complianceByWeek = data
+    ? data.complianceByWeek.map((w) => ({
+        ...w,
+        rate: w.total_count > 0 ? Math.round((w.completed_count / w.total_count) * 100) : 0,
+      }))
     : [];
 
   return (
@@ -43,7 +51,7 @@ function Insights() {
 
         {!loading && !error && data && (
           <>
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-4 gap-4 mb-6">
               <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-[#A6543A]" />
                 <div className="flex items-center gap-2 mb-2">
@@ -63,6 +71,17 @@ function Insights() {
                 </div>
                 <p className="text-3xl text-[#1F3D2B]" style={{ fontFamily: 'Fraunces' }}>
                   {data.deadlineStatus.overdue}
+                </p>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-[#2a4d38]" />
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle2 size={16} className="text-[#2a4d38]" />
+                  <p className="text-[#6b6355] text-sm">Deadline compliance rate</p>
+                </div>
+                <p className="text-3xl text-[#1F3D2B]" style={{ fontFamily: 'Fraunces' }}>
+                  {data.overallComplianceRate === null ? '—' : `${data.overallComplianceRate}%`}
                 </p>
               </div>
 
@@ -136,7 +155,7 @@ function Insights() {
 
               <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6">
                 <h2 className="text-lg text-[#1F3D2B] mb-1" style={{ fontFamily: 'Fraunces' }}>Deadline status</h2>
-                <p className="text-xs text-[#6b6355] mb-4">Overdue vs. upcoming, across all clients. (No completion tracking yet, so this is a snapshot, not an on-time rate.)</p>
+                <p className="text-xs text-[#6b6355] mb-4">Overdue, upcoming, and completed, across all clients.</p>
 
                 {statusData.length === 0 ? (
                   <p className="text-[#6b6355] text-sm py-6 text-center">No deadlines logged yet.</p>
@@ -166,6 +185,32 @@ function Insights() {
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 mb-6">
+              <h2 className="text-lg text-[#1F3D2B] mb-1" style={{ fontFamily: 'Fraunces' }}>Compliance rate by week due</h2>
+              <p className="text-xs text-[#6b6355] mb-4">
+                Of deadlines due that week, what share were marked complete. Based on completed status, not a completion timestamp — a deadline finished late still counts as compliant here.
+              </p>
+
+              {complianceByWeek.length === 0 ? (
+                <p className="text-[#6b6355] text-sm py-6 text-center">No past-due deadlines yet.</p>
+              ) : (
+                <div style={{ width: '100%', height: 220 }}>
+                  <ResponsiveContainer>
+                    <BarChart data={complianceByWeek} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0ebd9" vertical={false} />
+                      <XAxis dataKey="week_start" tick={{ fontSize: 11, fill: '#6b6355' }} />
+                      <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#6b6355' }} />
+                      <Tooltip
+                        formatter={(value, _name, props) => [`${value}% (${props.payload.completed_count}/${props.payload.total_count})`, 'Compliance']}
+                        contentStyle={{ borderRadius: 8, border: '1px solid #e8e1cf', fontSize: 12 }}
+                      />
+                      <Bar dataKey="rate" fill="#2a4d38" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
 
             {data.overdueDeadlines.length > 0 && (
