@@ -6,3 +6,12 @@ body {
   background-image: radial-gradient(circle, #e8e1cf 1px, transparent 1px);
   background-size: 22px 22px;
 }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.25s ease-out;
+}

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ToastProvider } from './components/Toast';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ConversationPanel from './pages/ConversationPanel';
@@ -9,17 +10,19 @@ import Insights from './pages/Insights';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/clients" element={<ConversationPanel />} />
-        <Route path="/timeline" element={<Timeline />} />
-        <Route path="/unbilled" element={<UnbilledTracker />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/insights" element={<Insights />} />
-      </Routes>
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/clients" element={<ConversationPanel />} />
+          <Route path="/timeline" element={<Timeline />} />
+          <Route path="/unbilled" element={<UnbilledTracker />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/insights" element={<Insights />} />
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
   );
 }
 

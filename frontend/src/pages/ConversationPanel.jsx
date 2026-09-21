@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import SimilarityNetwork from '../components/SimilarityNetwork';
+import { useToast } from '../components/Toast';
+import { Loader2 } from 'lucide-react';
 import { getClients, addClient, addEntry, addVoiceEntry } from '../api/client';
 
 function ConversationPanel() {
+  const showToast = useToast();
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [rawText, setRawText] = useState('');
@@ -12,7 +15,6 @@ function ConversationPanel() {
   const [lastMessageText, setLastMessageText] = useState('');
   const [classifierComparison, setClassifierComparison] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const [showAddClient, setShowAddClient] = useState(false);
   const [newClientName, setNewClientName] = useState('');
@@ -45,7 +47,6 @@ function ConversationPanel() {
     setSimilarMessages([]);
     setClassifierComparison(null);
     setLastMessageText('');
-    setError(null);
   };
 
   const handleExtract = async (e) => {
@@ -64,7 +65,7 @@ function ConversationPanel() {
       setLastMessageText(messageText);
       setRawText('');
     } catch (err) {
-      setError('AI extraction failed. Check the backend terminal for details.');
+      showToast('AI extraction failed. Check the backend terminal for details.', 'error');
     } finally {
       setLoading(false);
     }
@@ -84,7 +85,7 @@ function ConversationPanel() {
       setClassifierComparison(result.classifierComparison || null);
       setLastMessageText(result.raw_text || '');
     } catch (err) {
-      setError('Voice note processing failed. Check the backend terminal for details.');
+      showToast('Voice note processing failed. Check the backend terminal for details.', 'error');
     } finally {
       setLoading(false);
       e.target.value = '';
@@ -173,8 +174,9 @@ function ConversationPanel() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-[#1F3D2B] hover:bg-[#16301F] disabled:opacity-50 text-[#F6F1E4] text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+                  className="bg-[#1F3D2B] hover:bg-[#16301F] disabled:opacity-50 text-[#F6F1E4] text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2"
                 >
+                  {loading && <Loader2 size={14} className="animate-spin" />}
                   {loading ? 'Extracting...' : 'Log & extract'}
                 </button>
 
@@ -191,11 +193,33 @@ function ConversationPanel() {
               </div>
             </form>
 
-            {error && (
-              <p className="text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-6">{error}</p>
+            {loading && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3 text-sm text-[#6b6355]">
+                  <span>AI is thinking</span>
+                  <span className="flex gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#6b6355] animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#6b6355] animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#6b6355] animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {[0, 1].map((i) => (
+                    <div key={i} className="bg-white border border-[#e8e1cf] rounded-2xl p-5 animate-pulse">
+                      <div className="h-3 w-32 bg-[#eee6cf] rounded mb-2" />
+                      <div className="h-2 w-48 bg-[#f0ebd9] rounded mb-4" />
+                      <div className="space-y-2">
+                        <div className="h-3 w-full bg-[#f0ebd9] rounded" />
+                        <div className="h-3 w-5/6 bg-[#f0ebd9] rounded" />
+                        <div className="h-3 w-2/3 bg-[#f0ebd9] rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
-            {extracted && (
+            {!loading && extracted && (
               <div className="grid grid-cols-2 gap-4 mb-6">
                 {/* LLM extraction card */}
                 <div className="bg-white border border-[#e8e1cf] rounded-2xl p-5 relative">
