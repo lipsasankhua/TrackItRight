@@ -50,6 +50,12 @@ export async function markBilled(id) {
   return res.json();
 }
 
+export async function toggleEntryComplete(id) {
+  const res = await fetch(`${BASE_URL}/entries/${id}/complete`, { method: 'PATCH' });
+  if (!res.ok) throw new Error('Failed to update entry');
+  return res.json();
+}
+
 export async function getInsights() {
   const res = await fetch(`${BASE_URL}/insights`);
   if (!res.ok) throw new Error('Failed to fetch insights');

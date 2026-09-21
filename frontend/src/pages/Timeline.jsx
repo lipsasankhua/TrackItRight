@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { getClients, getEntries } from '../api/client';
+import { getClients, getEntries, toggleEntryComplete } from '../api/client';
 
 function Timeline() {
   const [clients, setClients] = useState([]);
@@ -20,6 +20,11 @@ function Timeline() {
       getEntries(selectedClient.id).then(setEntries);
     }
   }, [selectedClient]);
+
+  const handleToggleComplete = async (entryId) => {
+    await toggleEntryComplete(entryId);
+    getEntries(selectedClient.id).then(setEntries);
+  };
 
   return (
     <div className="min-h-screen bg-[#F6F1E4] flex">
@@ -66,12 +71,26 @@ function Timeline() {
                       </p>
                     )}
                   </div>
-                  <button
-                    onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
-                    className="text-xs text-[#1F3D2B] underline shrink-0"
-                  >
-                    {expandedId === entry.id ? 'Hide proof' : 'View proof'}
-                  </button>
+                  <div className="flex items-center gap-3 shrink-0">
+                    {entry.entry_type === 'deadline' && (
+                      <button
+                        onClick={() => handleToggleComplete(entry.id)}
+                        className={`text-xs rounded-lg px-3 py-1.5 transition-colors ${
+                          entry.completed
+                            ? 'bg-[#2a4d38] text-[#F6F1E4]'
+                            : 'border border-[#1F3D2B] text-[#1F3D2B] hover:bg-[#1F3D2B] hover:text-[#F6F1E4]'
+                        }`}
+                      >
+                        {entry.completed ? '✓ Completed' : 'Mark complete'}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+                      className="text-xs text-[#1F3D2B] underline"
+                    >
+                      {expandedId === entry.id ? 'Hide proof' : 'View proof'}
+                    </button>
+                  </div>
                 </div>
 
                 {expandedId === entry.id && (
