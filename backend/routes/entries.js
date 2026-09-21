@@ -46,9 +46,9 @@ async function findSimilarMessages(client_id, newEmbedding, excludeText) {
       text: m.raw_text,
       score: cosineSimilarity(newEmbedding, JSON.parse(m.embedding))
     }))
-    .filter(m => m.score > 0.55) // only reasonably similar ones
+    .filter(m => m.score > 0.4) // only reasonably similar ones
     .sort((a, b) => b.score - a.score)
-    .slice(0, 2);
+    .slice(0, 5);
 
   return scored;
 }

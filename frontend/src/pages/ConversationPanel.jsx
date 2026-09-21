@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
+import SimilarityNetwork from '../components/SimilarityNetwork';
 import { getClients, addClient, addEntry, addVoiceEntry } from '../api/client';
 
 function ConversationPanel() {
@@ -8,6 +9,7 @@ function ConversationPanel() {
   const [rawText, setRawText] = useState('');
   const [extracted, setExtracted] = useState(null);
   const [similarMessages, setSimilarMessages] = useState([]);
+  const [lastMessageText, setLastMessageText] = useState('');
   const [classifierComparison, setClassifierComparison] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -42,6 +44,7 @@ function ConversationPanel() {
     setExtracted(null);
     setSimilarMessages([]);
     setClassifierComparison(null);
+    setLastMessageText('');
     setError(null);
   };
 
@@ -49,14 +52,16 @@ function ConversationPanel() {
     e.preventDefault();
     if (!selectedClient || !rawText.trim()) return;
 
+    const messageText = rawText.trim();
     setLoading(true);
     resetResults();
 
     try {
-      const result = await addEntry({ client_id: selectedClient.id, raw_text: rawText });
+      const result = await addEntry({ client_id: selectedClient.id, raw_text: messageText });
       setExtracted(result.extracted);
       setSimilarMessages(result.similarMessages || []);
       setClassifierComparison(result.classifierComparison || null);
+      setLastMessageText(messageText);
       setRawText('');
     } catch (err) {
       setError('AI extraction failed. Check the backend terminal for details.');
@@ -77,6 +82,7 @@ function ConversationPanel() {
       setExtracted(result.extracted);
       setSimilarMessages(result.similarMessages || []);
       setClassifierComparison(result.classifierComparison || null);
+      setLastMessageText(result.raw_text || '');
     } catch (err) {
       setError('Voice note processing failed. Check the backend terminal for details.');
     } finally {
@@ -213,12 +219,9 @@ function ConversationPanel() {
 
                   {similarMessages.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-[#f0ebd9]">
-                      <p className="text-xs text-[#6b6355] mb-2">⚠ Possibly related to earlier requests:</p>
-                      {similarMessages.map((m, i) => (
-                        <p key={i} className="text-xs text-[#2B2620] bg-[#F6F1E4] rounded-lg px-3 py-2 mb-1">
-                          "{m.text}" — {Math.round(m.score * 100)}% similar
-                        </p>
-                      ))}
+                      <p className="text-xs text-[#6b6355] mb-1">⚠ Possibly related to earlier requests:</p>
+                      <p className="text-[10px] text-[#a89f8d] mb-2">Line thickness and shade reflect similarity strength (via local embeddings). Hover a node for the full message.</p>
+                      <SimilarityNetwork message={lastMessageText} matches={similarMessages} />
                     </div>
                   )}
                 </div>
