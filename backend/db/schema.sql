@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS entries (
   summary TEXT,
   due_date DATE,
   billed BOOLEAN DEFAULT 0,
+  completed BOOLEAN DEFAULT 0,
   estimated_value DECIMAL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (message_id) REFERENCES messages(id),

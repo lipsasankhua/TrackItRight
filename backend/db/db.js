@@ -20,7 +20,19 @@ async function initDB() {
     saveDB();
   }
 
+  runMigrations();
+
   return db;
+}
+
+// Adds columns introduced after the initial schema to databases that
+// already exist on disk, since schema.sql only runs for a brand new file.
+function runMigrations() {
+  const columns = db.exec("PRAGMA table_info(entries)")[0].values.map((row) => row[1]);
+  if (!columns.includes('completed')) {
+    db.run('ALTER TABLE entries ADD COLUMN completed BOOLEAN DEFAULT 0');
+    saveDB();
+  }
 }
 
 function saveDB() {

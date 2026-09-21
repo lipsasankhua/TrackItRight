@@ -18,6 +18,21 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// PATCH /entries/:id/complete — toggle a deadline entry's completed status
+router.patch('/:id/complete', (req, res) => {
+  try {
+    runQuery(
+      'UPDATE entries SET completed = CASE WHEN completed = 1 THEN 0 ELSE 1 END WHERE id = ?',
+      [req.params.id]
+    );
+    const updated = queryAll('SELECT completed FROM entries WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Toggled completion', completed: !!updated[0]?.completed });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update entry' });
+  }
+});
+
 router.get('/:client_id', (req, res) => {
   try {
     const { client_id } = req.params;
