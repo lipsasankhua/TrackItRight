@@ -56,6 +56,12 @@ export async function toggleEntryComplete(id) {
   return res.json();
 }
 
+export async function searchAll(query) {
+  const res = await fetch(`${BASE_URL}/search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error('Search failed');
+  return res.json();
+}
+
 export async function getInsights() {
   const res = await fetch(`${BASE_URL}/insights`);
   if (!res.ok) throw new Error('Failed to fetch insights');

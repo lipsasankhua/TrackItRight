@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { getClients, getEntries, toggleEntryComplete } from '../api/client';
 
 function Timeline() {
+  const [searchParams] = useSearchParams();
+  const clientParam = searchParams.get('client');
+  const entryParam = searchParams.get('entry');
+
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [entries, setEntries] = useState([]);
@@ -11,13 +16,24 @@ function Timeline() {
   useEffect(() => {
     getClients().then((data) => {
       setClients(data);
-      if (data.length > 0) setSelectedClient(data[0]);
+      if (data.length > 0) {
+        const preselect = clientParam && data.find((c) => String(c.id) === clientParam);
+        setSelectedClient(preselect || data[0]);
+      }
     });
   }, []);
 
   useEffect(() => {
     if (selectedClient) {
-      getEntries(selectedClient.id).then(setEntries);
+      getEntries(selectedClient.id).then((data) => {
+        setEntries(data);
+        if (entryParam && data.some((e) => String(e.id) === entryParam)) {
+          setExpandedId(Number(entryParam));
+          setTimeout(() => {
+            document.getElementById(`entry-${entryParam}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
+      });
     }
   }, [selectedClient]);
 
@@ -58,7 +74,7 @@ function Timeline() {
         ) : (
           <div className="space-y-3">
             {entries.map((entry) => (
-              <div key={entry.id} className="bg-white rounded-2xl border border-[#e8e1cf] p-5">
+              <div key={entry.id} id={`entry-${entry.id}`} className="bg-white rounded-2xl border border-[#e8e1cf] p-5">
                 <div className="flex items-start justify-between">
                   <div>
                     <span className="inline-block text-xs px-2 py-0.5 rounded-md bg-[#F6F1E4] text-[#1F3D2B] font-medium capitalize mb-2">
