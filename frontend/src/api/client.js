@@ -50,6 +50,12 @@ export async function markBilled(id) {
   return res.json();
 }
 
+export async function getInsights() {
+  const res = await fetch(`${BASE_URL}/insights`);
+  if (!res.ok) throw new Error('Failed to fetch insights');
+  return res.json();
+}
+
 export async function getReport(clientId) {
   const res = await fetch(`${BASE_URL}/reports/${clientId}`);
   if (!res.ok) throw new Error('Failed to fetch report');

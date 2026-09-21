@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Clock, Receipt, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, Clock, Receipt, FileText, BarChart3 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { label: 'Timeline', path: '/timeline', icon: Clock },
   { label: 'Unbilled Work', path: '/unbilled', icon: Receipt },
   { label: 'Reports', path: '/reports', icon: FileText },
+  { label: 'Insights', path: '/insights', icon: BarChart3 },
 ];
 
 function Sidebar() {

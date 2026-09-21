@@ -5,6 +5,7 @@ import ConversationPanel from './pages/ConversationPanel';
 import Timeline from './pages/Timeline';
 import UnbilledTracker from './pages/UnbilledTracker';
 import Reports from './pages/Reports';
+import Insights from './pages/Insights';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/unbilled" element={<UnbilledTracker />} />
         <Route path="/reports" element={<Reports />} />
+        <Route path="/insights" element={<Insights />} />
       </Routes>
     </BrowserRouter>
   );
