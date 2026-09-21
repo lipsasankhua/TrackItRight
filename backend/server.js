@@ -7,6 +7,7 @@ const dashboardRouter = require('./routes/dashboard');
 const entriesRouter = require('./routes/entries');
 const unbilledRouter = require('./routes/unbilled');
 const reportsRouter = require('./routes/reports');
+const insightsRouter = require('./routes/insights');
 const fs = require('fs');
 const uploadsDir = require('path').join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -26,6 +27,7 @@ app.use('/dashboard', dashboardRouter);
 app.use('/entries', entriesRouter);
 app.use('/unbilled', unbilledRouter);
 app.use('/reports', reportsRouter);
+app.use('/insights', insightsRouter);
 
 const PORT = process.env.PORT || 5000;
 
