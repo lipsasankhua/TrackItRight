@@ -80,6 +80,30 @@ router.get('/', (req, res) => {
       ? Math.round((pastDue.completed_count / pastDue.total_count) * 100)
       : null;
 
+    // Real-world agreement rate between the LLM and the trained classifier,
+    // computed from actual production extractions — not the notebook's
+    // static held-out test accuracy. Only counts entries where the
+    // classifier was actually reachable at extraction time.
+    const classifierAgreement = queryAll(`
+      SELECT
+        COALESCE(SUM(CASE WHEN needs_review = 0 THEN 1 ELSE 0 END), 0) AS agree_count,
+        COUNT(*) AS total_count
+      FROM entries
+      WHERE classifier_label IS NOT NULL
+    `)[0];
+
+    const classifierAgreementRate = classifierAgreement.total_count > 0
+      ? Math.round((classifierAgreement.agree_count / classifierAgreement.total_count) * 100)
+      : null;
+
+    const needsReview = queryAll(`
+      SELECT entries.id, entries.entry_type, entries.summary, entries.review_reason, clients.name AS client_name
+      FROM entries
+      JOIN clients ON entries.client_id = clients.id
+      WHERE entries.needs_review = 1
+      ORDER BY entries.created_at DESC
+    `);
+
     res.json({
       unbilledBacklogByWeek,
       scopeCreepByClient,
@@ -87,6 +111,9 @@ router.get('/', (req, res) => {
       overdueDeadlines,
       complianceByWeek,
       overallComplianceRate,
+      classifierAgreementRate,
+      classifierAgreementSampleSize: classifierAgreement.total_count,
+      needsReview,
     });
   } catch (err) {
     console.error(err);

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { getInsights } from '../api/client';
-import { TrendingUp, AlertTriangle, Users, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Users, CheckCircle2, ShieldCheck } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from 'recharts';
 
 const STATUS_COLORS = { overdue: '#A6543A', upcoming: '#5B7B8C', completed: '#2a4d38' };
+const REVIEW_COLOR = '#b45309';
 
 function Insights() {
   const [data, setData] = useState(null);
@@ -51,7 +52,7 @@ function Insights() {
 
         {!loading && !error && data && (
           <>
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-5 gap-4 mb-6">
               <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-[#A6543A]" />
                 <div className="flex items-center gap-2 mb-2">
@@ -96,6 +97,20 @@ function Insights() {
                 </p>
                 {topScopeCreepClient && (
                   <p className="text-xs text-[#6b6355] mt-1">{topScopeCreepClient.extra_work_count} extra-work requests</p>
+                )}
+              </div>
+
+              <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1.5 h-full" style={{ backgroundColor: REVIEW_COLOR }} />
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldCheck size={16} style={{ color: REVIEW_COLOR }} />
+                  <p className="text-[#6b6355] text-sm">LLM/classifier agreement</p>
+                </div>
+                <p className="text-3xl text-[#1F3D2B]" style={{ fontFamily: 'Fraunces' }}>
+                  {data.classifierAgreementRate === null ? '—' : `${data.classifierAgreementRate}%`}
+                </p>
+                {data.classifierAgreementSampleSize > 0 && (
+                  <p className="text-xs text-[#6b6355] mt-1">{data.classifierAgreementSampleSize} live extractions checked</p>
                 )}
               </div>
             </div>

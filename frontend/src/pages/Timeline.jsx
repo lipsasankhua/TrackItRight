@@ -77,14 +77,25 @@ function Timeline() {
               <div key={entry.id} id={`entry-${entry.id}`} className="bg-white rounded-2xl border border-[#e8e1cf] p-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <span className="inline-block text-xs px-2 py-0.5 rounded-md bg-[#F6F1E4] text-[#1F3D2B] font-medium capitalize mb-2">
+                    <span className="inline-block text-xs px-2 py-0.5 rounded-md bg-[#F6F1E4] text-[#1F3D2B] font-medium capitalize mb-2 mr-1.5">
                       {entry.entry_type?.replace('_', ' ')}
                     </span>
+                    {!!entry.needs_review && (
+                      <span
+                        className="inline-block text-xs px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-medium mb-2"
+                        title={entry.review_reason}
+                      >
+                        ⚠ Needs review
+                      </span>
+                    )}
                     <p className="text-[#2B2620] font-medium">{entry.summary}</p>
                     {entry.due_date && (
                       <p className="text-xs text-[#6b6355] mt-1" style={{ fontFamily: 'IBM Plex Mono' }}>
                         Due {entry.due_date}
                       </p>
+                    )}
+                    {!!entry.needs_review && (
+                      <p className="text-xs text-amber-700 mt-1">{entry.review_reason}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-3 shrink-0">

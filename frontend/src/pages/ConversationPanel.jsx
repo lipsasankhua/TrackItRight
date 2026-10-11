@@ -14,6 +14,8 @@ function ConversationPanel() {
   const [similarMessages, setSimilarMessages] = useState([]);
   const [lastMessageText, setLastMessageText] = useState('');
   const [classifierComparison, setClassifierComparison] = useState(null);
+  const [needsReview, setNeedsReview] = useState(false);
+  const [reviewReason, setReviewReason] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [showAddClient, setShowAddClient] = useState(false);
@@ -47,6 +49,8 @@ function ConversationPanel() {
     setSimilarMessages([]);
     setClassifierComparison(null);
     setLastMessageText('');
+    setNeedsReview(false);
+    setReviewReason(null);
   };
 
   const handleExtract = async (e) => {
@@ -62,6 +66,8 @@ function ConversationPanel() {
       setExtracted(result.extracted);
       setSimilarMessages(result.similarMessages || []);
       setClassifierComparison(result.classifierComparison || null);
+      setNeedsReview(result.needsReview || false);
+      setReviewReason(result.reviewReason || null);
       setLastMessageText(messageText);
       setRawText('');
     } catch (err) {
@@ -83,6 +89,8 @@ function ConversationPanel() {
       setExtracted(result.extracted);
       setSimilarMessages(result.similarMessages || []);
       setClassifierComparison(result.classifierComparison || null);
+      setNeedsReview(result.needsReview || false);
+      setReviewReason(result.reviewReason || null);
       setLastMessageText(result.raw_text || '');
     } catch (err) {
       showToast('Voice note processing failed. Check the backend terminal for details.', 'error');
@@ -91,11 +99,6 @@ function ConversationPanel() {
       e.target.value = '';
     }
   };
-
-  // Normalises 'extra_work' vs 'extra work' style differences before comparing
-  const normalize = (s) => (s || '').toLowerCase().replace(/[\s_-]/g, '');
-  const typesAgree = classifierComparison && extracted &&
-    normalize(classifierComparison.label) === normalize(extracted.entry_type);
 
   return (
     <div className="min-h-screen bg-[#F6F1E4] flex">
@@ -264,10 +267,16 @@ function ConversationPanel() {
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-[#6b6355] text-sm">Type: </span>
                         <span className="text-[#2B2620] font-medium capitalize text-sm">{classifierComparison.label?.replace('_', ' ')}</span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${typesAgree ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
-                          {typesAgree ? '✓ Agrees with LLM' : '⚠ Differs from LLM'}
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${needsReview ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
+                          {needsReview ? '⚠ Differs from LLM' : '✓ Agrees with LLM'}
                         </span>
                       </div>
+
+                      {needsReview && (
+                        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-3">
+                          {reviewReason} This entry has been flagged for review on Timeline and Dashboard.
+                        </p>
+                      )}
 
                       <p className="text-xs text-[#6b6355] mb-2">Confidence breakdown:</p>
                       <div className="space-y-1.5">

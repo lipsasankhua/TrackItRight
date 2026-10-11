@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { getDashboard } from '../api/client';
-import { Receipt, CalendarClock, Inbox } from 'lucide-react';
+import { Receipt, CalendarClock, Inbox, ShieldAlert } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 const TYPE_COLORS = { deadline: '#C9A227', task: '#5B7B8C', extra_work: '#A6543A' };
+const REVIEW_COLOR = '#b45309';
 
 function Dashboard() {
-  const [data, setData] = useState({ upcomingDeadlines: [], totalUnbilled: 0, entryBreakdown: [] });
+  const [data, setData] = useState({ upcomingDeadlines: [], totalUnbilled: 0, entryBreakdown: [], needsReview: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -31,7 +32,7 @@ function Dashboard() {
 
         {!loading && !error && (
           <>
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-[#A6543A]" />
                 <div className="flex items-center gap-2 mb-2">
@@ -52,7 +53,38 @@ function Dashboard() {
                   {data.upcomingDeadlines.length}
                 </p>
               </div>
+              <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1.5 h-full" style={{ backgroundColor: REVIEW_COLOR }} />
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldAlert size={16} style={{ color: REVIEW_COLOR }} />
+                  <p className="text-[#6b6355] text-sm">Flagged for review</p>
+                </div>
+                <p className="text-3xl text-[#1F3D2B]" style={{ fontFamily: 'Fraunces' }}>
+                  {data.needsReview.length}
+                </p>
+              </div>
             </div>
+
+            {data.needsReview.length > 0 && (
+              <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 mb-6">
+                <h2 className="text-lg text-[#1F3D2B] mb-1" style={{ fontFamily: 'Fraunces' }}>Flagged for review</h2>
+                <p className="text-xs text-[#6b6355] mb-4">The LLM and the trained classifier disagreed on how to categorize these — worth a quick human check.</p>
+                <div className="space-y-3">
+                  {data.needsReview.map((entry) => (
+                    <div key={entry.id} className="flex items-start justify-between border-b border-[#f0ebd9] pb-3 last:border-0">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-10 rounded-full mt-0.5" style={{ backgroundColor: REVIEW_COLOR }} />
+                        <div>
+                          <p className="text-[#2B2620] text-sm font-medium">{entry.summary}</p>
+                          <p className="text-[#6b6355] text-xs mb-1">{entry.client_name?.trim()}</p>
+                          <p className="text-xs" style={{ color: REVIEW_COLOR }}>{entry.review_reason}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 mb-6">
               <h2 className="text-lg text-[#1F3D2B] mb-4" style={{ fontFamily: 'Fraunces' }}>Upcoming deadlines</h2>

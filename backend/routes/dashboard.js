@@ -32,11 +32,22 @@ router.get('/', (req, res) => {
       GROUP BY entry_type
    `);
 
+    // Entries where the trained classifier disagreed with the LLM's
+    // classification — flagged for a human to double-check.
+    const needsReview = queryAll(`
+      SELECT entries.id, entries.entry_type, entries.summary, entries.review_reason, clients.name AS client_name
+      FROM entries
+      JOIN clients ON entries.client_id = clients.id
+      WHERE entries.needs_review = 1
+      ORDER BY entries.created_at DESC
+    `);
+
     res.json({
   upcomingDeadlines,
   totalUnbilled: unbilledResult[0].total_unbilled,
-  entryBreakdown
-}); 
+  entryBreakdown,
+  needsReview,
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch dashboard data' });
