@@ -26,6 +26,10 @@ CREATE TABLE IF NOT EXISTS entries (
   billed BOOLEAN DEFAULT 0,
   completed BOOLEAN DEFAULT 0,
   estimated_value DECIMAL,
+  classifier_label TEXT,
+  classifier_confidence DECIMAL,
+  needs_review BOOLEAN DEFAULT 0,
+  review_reason TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (message_id) REFERENCES messages(id),
   FOREIGN KEY (client_id) REFERENCES clients(id)

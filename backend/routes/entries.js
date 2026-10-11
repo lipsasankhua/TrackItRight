@@ -68,6 +68,36 @@ async function findSimilarMessages(client_id, newEmbedding, excludeText) {
   return scored;
 }
 
+// Strips spaces/underscores/hyphens and lowercases, so 'extra_work' and
+// 'extra work' compare as the same label.
+function normalizeLabel(s) {
+  return (s || '').toLowerCase().replace(/[\s_-]/g, '');
+}
+
+// Cross-checks the LLM's classification against the independently trained
+// classifier. When they disagree, the entry is flagged for human review
+// instead of silently trusting whichever model answered first — this is
+// the safety net: a wrong classification can mean missed billable work or
+// a missed deadline, and nobody would otherwise know it happened.
+function evaluateClassifierAgreement(extracted, classifierResult) {
+  if (!classifierResult) {
+    return { classifier_label: null, classifier_confidence: null, needs_review: false, review_reason: null };
+  }
+
+  const agrees = normalizeLabel(extracted.entry_type) === normalizeLabel(classifierResult.label);
+  if (agrees) {
+    return { classifier_label: classifierResult.label, classifier_confidence: classifierResult.confidence, needs_review: false, review_reason: null };
+  }
+
+  const confidencePct = Math.round((classifierResult.confidence || 0) * 100);
+  return {
+    classifier_label: classifierResult.label,
+    classifier_confidence: classifierResult.confidence,
+    needs_review: true,
+    review_reason: `LLM classified this as "${extracted.entry_type}", but the trained classifier predicted "${classifierResult.label}" (${confidencePct}% confidence) — worth a second look.`,
+  };
+}
+
 async function saveMessageAndExtract(client_id, raw_text, source) {
   const embedding = await getEmbedding(raw_text);
   const similar = await findSimilarMessages(client_id, embedding, raw_text);
@@ -82,10 +112,11 @@ async function saveMessageAndExtract(client_id, raw_text, source) {
 
   const extracted = await extractFromMessage(raw_text);
   const classifierResult = await getClassifierPrediction(raw_text);
+  const review = evaluateClassifierAgreement(extracted, classifierResult);
 
   runQuery(
-    `INSERT INTO entries (message_id, client_id, entry_type, summary, due_date, billed, estimated_value)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO entries (message_id, client_id, entry_type, summary, due_date, billed, estimated_value, classifier_label, classifier_confidence, needs_review, review_reason)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       message_id,
       client_id,
@@ -93,11 +124,21 @@ async function saveMessageAndExtract(client_id, raw_text, source) {
       extracted.summary,
       extracted.due_date,
       extracted.billable ? 0 : 1,
-      extracted.estimated_value
+      extracted.estimated_value,
+      review.classifier_label,
+      review.classifier_confidence,
+      review.needs_review ? 1 : 0,
+      review.review_reason,
     ]
   );
 
-  return { extracted, similarMessages: similar, classifierComparison: classifierResult };
+  return {
+    extracted,
+    similarMessages: similar,
+    classifierComparison: classifierResult,
+    needsReview: review.needs_review,
+    reviewReason: review.review_reason,
+  };
 }
 
 router.post('/', async (req, res) => {

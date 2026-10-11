@@ -29,10 +29,21 @@ async function initDB() {
 // already exist on disk, since schema.sql only runs for a brand new file.
 function runMigrations() {
   const columns = db.exec("PRAGMA table_info(entries)")[0].values.map((row) => row[1]);
-  if (!columns.includes('completed')) {
-    db.run('ALTER TABLE entries ADD COLUMN completed BOOLEAN DEFAULT 0');
-    saveDB();
+  const newColumns = {
+    completed: 'BOOLEAN DEFAULT 0',
+    classifier_label: 'TEXT',
+    classifier_confidence: 'DECIMAL',
+    needs_review: 'BOOLEAN DEFAULT 0',
+    review_reason: 'TEXT',
+  };
+  let migrated = false;
+  for (const [name, definition] of Object.entries(newColumns)) {
+    if (!columns.includes(name)) {
+      db.run(`ALTER TABLE entries ADD COLUMN ${name} ${definition}`);
+      migrated = true;
+    }
   }
+  if (migrated) saveDB();
 }
 
 function saveDB() {
