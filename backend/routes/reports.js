@@ -7,6 +7,11 @@ router.get('/:client_id', (req, res) => {
   try {
     const { client_id } = req.params;
 
+    const owned = queryAll('SELECT id FROM clients WHERE id = ? AND user_id = ?', [client_id, req.user.id]);
+    if (owned.length === 0) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
     const entries = queryAll(`
       SELECT entries.*, messages.raw_text
       FROM entries

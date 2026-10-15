@@ -10,14 +10,15 @@ router.get('/', (req, res) => {
     if (!q) return res.json({ clients: [], entries: [] });
 
     const like = `%${q}%`;
+    const userId = req.user.id;
 
     const clients = queryAll(
       `SELECT id, name, company, field
        FROM clients
-       WHERE name LIKE ? OR company LIKE ? OR field LIKE ?
+       WHERE user_id = ? AND (name LIKE ? OR company LIKE ? OR field LIKE ?)
        ORDER BY name ASC
        LIMIT 5`,
-      [like, like, like]
+      [userId, like, like, like]
     );
 
     const entries = queryAll(
@@ -26,10 +27,10 @@ router.get('/', (req, res) => {
        FROM entries
        JOIN clients ON entries.client_id = clients.id
        JOIN messages ON entries.message_id = messages.id
-       WHERE entries.summary LIKE ? OR messages.raw_text LIKE ?
+       WHERE clients.user_id = ? AND (entries.summary LIKE ? OR messages.raw_text LIKE ?)
        ORDER BY entries.created_at DESC
        LIMIT 5`,
-      [like, like]
+      [userId, like, like]
     );
 
     res.json({ clients, entries });

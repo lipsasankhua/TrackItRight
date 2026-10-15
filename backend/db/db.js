@@ -25,24 +25,47 @@ async function initDB() {
   return db;
 }
 
-// Adds columns introduced after the initial schema to databases that
+// Adds tables/columns introduced after the initial schema to databases that
 // already exist on disk, since schema.sql only runs for a brand new file.
 function runMigrations() {
-  const columns = db.exec("PRAGMA table_info(entries)")[0].values.map((row) => row[1]);
-  const newColumns = {
+  let migrated = false;
+
+  const entryColumns = db.exec("PRAGMA table_info(entries)")[0].values.map((row) => row[1]);
+  const newEntryColumns = {
     completed: 'BOOLEAN DEFAULT 0',
     classifier_label: 'TEXT',
     classifier_confidence: 'DECIMAL',
     needs_review: 'BOOLEAN DEFAULT 0',
     review_reason: 'TEXT',
+    resolved_label: 'TEXT',
+    resolved_at: 'DATETIME',
   };
-  let migrated = false;
-  for (const [name, definition] of Object.entries(newColumns)) {
-    if (!columns.includes(name)) {
+  for (const [name, definition] of Object.entries(newEntryColumns)) {
+    if (!entryColumns.includes(name)) {
       db.run(`ALTER TABLE entries ADD COLUMN ${name} ${definition}`);
       migrated = true;
     }
   }
+
+  // users/clients.user_id: added for per-business login. A database created
+  // before this always has a `users` table (CREATE TABLE IF NOT EXISTS is
+  // safe to re-run), but `clients.user_id` needs an explicit ALTER, and any
+  // pre-existing clients will have it NULL until ensureDemoAccount.js backfills
+  // them to a demo account on the next server startup.
+  db.run(`CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    business_name TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  const clientColumns = db.exec("PRAGMA table_info(clients)")[0].values.map((row) => row[1]);
+  if (!clientColumns.includes('user_id')) {
+    db.run('ALTER TABLE clients ADD COLUMN user_id INTEGER');
+    migrated = true;
+  }
+
   if (migrated) saveDB();
 }
 
