@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { runQuery, queryAll } = require('./db');
 
 // Backdates seeded entries so week-over-week analytics charts have
@@ -6,6 +7,46 @@ function daysAgoTimestamp(days) {
   const d = new Date();
   d.setDate(d.getDate() - days);
   return d.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+// Inserts one seeded business account (if its email doesn't already exist)
+// with its own clients and entries, fully isolated from every other
+// account. Used so demo data survives Render wiping its disk on every
+// restart — anything not baked into code here is gone on the next deploy.
+function seedBusiness({ email, password, businessName, clients, entriesData }) {
+  let user = queryAll('SELECT id FROM users WHERE email = ?', [email])[0];
+  if (!user) {
+    const password_hash = bcrypt.hashSync(password, 10);
+    runQuery('INSERT INTO users (email, password_hash, business_name) VALUES (?, ?, ?)', [email, password_hash, businessName]);
+    user = queryAll('SELECT id FROM users WHERE email = ?', [email])[0];
+  }
+
+  const existingClients = queryAll('SELECT COUNT(*) as count FROM clients WHERE user_id = ?', [user.id]);
+  if (existingClients[0].count > 0) return;
+
+  const clientIds = [];
+  for (const c of clients) {
+    runQuery('INSERT INTO clients (user_id, name, company, field) VALUES (?, ?, ?, ?)', [user.id, c.name, c.company, c.field]);
+    const last = queryAll('SELECT id FROM clients ORDER BY id DESC LIMIT 1');
+    clientIds.push(last[0].id);
+  }
+
+  for (const e of entriesData) {
+    const client_id = clientIds[e.client];
+    const createdAt = daysAgoTimestamp((e.weeksAgo || 0) * 7);
+
+    runQuery(
+      'INSERT INTO messages (client_id, raw_text, source, received_at) VALUES (?, ?, ?, ?)',
+      [client_id, e.text, 'manual', createdAt]
+    );
+    const lastMsg = queryAll('SELECT id FROM messages ORDER BY id DESC LIMIT 1');
+
+    runQuery(
+      `INSERT INTO entries (message_id, client_id, entry_type, summary, due_date, billed, estimated_value, completed, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [lastMsg[0].id, client_id, e.type, e.summary, e.due, e.billed, e.value, e.completed || 0, createdAt]
+    );
+  }
 }
 
 function seedIfEmpty() {
@@ -67,6 +108,36 @@ function seedIfEmpty() {
   }
 
   console.log('Demo data seeded successfully.');
+
+  seedBusiness({
+    email: 'interiors.demo@trackitright.app',
+    password: 'interiors123',
+    businessName: 'ArtClick Interiors',
+    clients: [
+      { name: 'Rhea Malhotra', company: 'Malhotra Residence', field: 'Apartment renovation' },
+      { name: 'Kapadia Family', company: 'Kapadia Residence', field: 'New home interiors' },
+      { name: 'Arjun & Priya Sharma', company: 'Sharma Residence', field: 'Full home interiors' },
+    ],
+    entriesData: [
+      // Rhea Malhotra
+      { client: 0, text: 'Please finalize the fabric samples for the living room curtains by October 20, 2026.', type: 'deadline', summary: 'Finalize fabric samples for living room curtains', due: '2026-10-20', billed: 0, value: null, weeksAgo: 1 },
+      { client: 0, text: "Also, could you source a custom-built bookshelf for the study? This wasn't part of the original scope, happy to pay extra for it.", type: 'extra_work', summary: 'Source a custom-built bookshelf for the study', due: null, billed: 0, value: 18000, weeksAgo: 1 },
+      { client: 0, text: 'Just confirming the wall paint shade we picked last week is locked in.', type: 'task', summary: 'Confirm wall paint shade is locked in', due: null, billed: 0, value: null, weeksAgo: 0 },
+
+      // Kapadia Family
+      { client: 1, text: 'The modular kitchen installation needs to be completed before October 10, 2026 for our housewarming.', type: 'deadline', summary: 'Complete modular kitchen installation', due: '2026-10-10', billed: 0, value: null, completed: 1, weeksAgo: 3 },
+      { client: 1, text: "We'd like to add a walk-in wardrobe to the master bedroom, it wasn't in the original plan, please quote the additional cost.", type: 'extra_work', summary: 'Add walk-in wardrobe to master bedroom', due: null, billed: 0, value: 55000, weeksAgo: 2 },
+      { client: 1, text: 'Please double-check the tile samples match what we discussed on the call.', type: 'task', summary: 'Double-check tile samples match what was discussed', due: null, billed: 0, value: null, weeksAgo: 1 },
+      { client: 1, text: 'Can you send the final floor plan by November 5, 2026?', type: 'deadline', summary: 'Send final floor plan', due: '2026-11-05', billed: 0, value: null, weeksAgo: 0 },
+
+      // Arjun & Priya Sharma
+      { client: 2, text: 'We saw a custom dining table we loved and want something similar made, this is beyond what we originally discussed, let us know the cost.', type: 'extra_work', summary: 'Custom dining table, beyond original scope', due: null, billed: 0, value: 42000, weeksAgo: 2 },
+      { client: 2, text: 'Please make sure the kids room paint colors are finalized by October 18, 2026.', type: 'deadline', summary: 'Finalize kids room paint colors', due: '2026-10-18', billed: 0, value: null, weeksAgo: 1 },
+      { client: 2, text: 'Reminder, the living room lighting fixtures need final approval before November 1, 2026.', type: 'deadline', summary: 'Living room lighting fixtures need final approval', due: '2026-11-01', billed: 0, value: null, weeksAgo: 0 },
+    ],
+  });
+
+  console.log('Second demo business (ArtClick Interiors) seeded successfully.');
 }
 
 module.exports = { seedIfEmpty };
