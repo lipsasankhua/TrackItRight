@@ -1,14 +1,27 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { login } from '../api/client';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setError(null);
+    setLoading(true);
+    try {
+      await login(email, password);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -22,6 +35,10 @@ function Login() {
 
         <h1 className="text-3xl text-[#1F3D2B] mb-1" style={{ fontFamily: 'Fraunces' }}>TrackItRight</h1>
         <p className="text-[#6b6355] text-sm mb-8">Every request, logged and proven.</p>
+
+        {error && (
+          <p className="text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 text-sm mb-4">{error}</p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -50,11 +67,22 @@ function Login() {
 
           <button
             type="submit"
-            className="w-full bg-[#1F3D2B] hover:bg-[#16301F] text-[#F6F1E4] font-medium rounded-xl py-2.5 transition-colors mt-2"
+            disabled={loading}
+            className="w-full bg-[#1F3D2B] hover:bg-[#16301F] disabled:opacity-50 text-[#F6F1E4] font-medium rounded-xl py-2.5 transition-colors mt-2 flex items-center justify-center gap-2"
           >
-            Sign in
+            {loading && <Loader2 size={16} className="animate-spin" />}
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
+
+        <p className="text-center text-sm text-[#6b6355] mt-4">
+          No account? <Link to="/signup" className="text-[#1F3D2B] font-medium underline">Sign up</Link>
+        </p>
+
+        <p className="text-center text-xs text-[#a89f8d] mt-3">
+          Demo: demo@trackitright.app / demo1234
+        </p>
+
         <p className="text-center text-xs text-[#8a8171] mt-6">
   Developed by Lipsa Sankhua · Built during internship at Talking Crooks IT Pvt. Ltd.
         </p>

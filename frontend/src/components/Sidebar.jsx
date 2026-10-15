@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Clock, Receipt, FileText, BarChart3, Search } from 'lucide-react';
-import { searchAll } from '../api/client';
+import { LayoutDashboard, Users, Clock, Receipt, FileText, BarChart3, Search, LogOut, MessageCircleQuestion } from 'lucide-react';
+import { searchAll, getBusinessName, logout } from '../api/client';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { label: 'Unbilled Work', path: '/unbilled', icon: Receipt },
   { label: 'Reports', path: '/reports', icon: FileText },
   { label: 'Insights', path: '/insights', icon: BarChart3 },
+  { label: 'Ask Your Data', path: '/ask', icon: MessageCircleQuestion },
 ];
 
 function Sidebar() {
@@ -53,6 +54,11 @@ function Sidebar() {
   };
 
   const hasResults = results && (results.clients.length > 0 || results.entries.length > 0);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="w-60 min-h-screen bg-[#1F3D2B] text-[#F6F1E4] flex flex-col py-6 px-4">
@@ -137,7 +143,19 @@ function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto px-2 pt-6 border-t border-[#2a4d38]">
+      <div className="mt-auto px-2 pt-4 border-t border-[#2a4d38]">
+  <div className="flex items-center justify-between mb-4">
+    <p className="text-xs text-[#d8d3c2] truncate" title={getBusinessName() || ''}>
+      {getBusinessName() || 'Signed in'}
+    </p>
+    <button
+      onClick={handleLogout}
+      className="text-[#8ca592] hover:text-[#F6F1E4] transition-colors shrink-0 ml-2"
+      title="Log out"
+    >
+      <LogOut size={14} />
+    </button>
+  </div>
   <p className="text-[10px] text-[#8ca592] leading-relaxed mb-2">
     Every request, timestamped and proven.
   </p>

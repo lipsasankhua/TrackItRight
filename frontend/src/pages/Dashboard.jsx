@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { getDashboard } from '../api/client';
+import { useToast } from '../components/Toast';
+import { getDashboard, resolveReview } from '../api/client';
 import { Receipt, CalendarClock, Inbox, ShieldAlert } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -8,16 +9,35 @@ const TYPE_COLORS = { deadline: '#C9A227', task: '#5B7B8C', extra_work: '#A6543A
 const REVIEW_COLOR = '#b45309';
 
 function Dashboard() {
+  const showToast = useToast();
   const [data, setData] = useState({ upcomingDeadlines: [], totalUnbilled: 0, entryBreakdown: [], needsReview: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [resolvingId, setResolvingId] = useState(null);
 
-  useEffect(() => {
+  const load = () => {
     getDashboard()
       .then(setData)
       .catch(() => setError('Could not load dashboard data. Is the backend running?'))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
   }, []);
+
+  const handleResolve = async (entryId, label) => {
+    setResolvingId(entryId);
+    try {
+      await resolveReview(entryId, label);
+      showToast(`Marked as "${label.replace('_', ' ')}" — fed back to the classifier for the next retrain.`, 'success');
+      load();
+    } catch (err) {
+      showToast('Could not resolve this review. Try again.', 'error');
+    } finally {
+      setResolvingId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -71,14 +91,32 @@ function Dashboard() {
                 <p className="text-xs text-[#6b6355] mb-4">The LLM and the trained classifier disagreed on how to categorize these — worth a quick human check.</p>
                 <div className="space-y-3">
                   {data.needsReview.map((entry) => (
-                    <div key={entry.id} className="flex items-start justify-between border-b border-[#f0ebd9] pb-3 last:border-0">
-                      <div className="flex items-start gap-3">
-                        <div className="w-1.5 h-10 rounded-full mt-0.5" style={{ backgroundColor: REVIEW_COLOR }} />
-                        <div>
+                    <div key={entry.id} className="flex items-start justify-between gap-4 border-b border-[#f0ebd9] pb-3 last:border-0">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="w-1.5 h-10 rounded-full mt-0.5 shrink-0" style={{ backgroundColor: REVIEW_COLOR }} />
+                        <div className="min-w-0">
                           <p className="text-[#2B2620] text-sm font-medium">{entry.summary}</p>
                           <p className="text-[#6b6355] text-xs mb-1">{entry.client_name?.trim()}</p>
                           <p className="text-xs" style={{ color: REVIEW_COLOR }}>{entry.review_reason}</p>
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => handleResolve(entry.id, entry.entry_type)}
+                          disabled={resolvingId === entry.id}
+                          className="text-xs border border-[#1F3D2B] text-[#1F3D2B] rounded-lg px-2.5 py-1.5 hover:bg-[#1F3D2B] hover:text-[#F6F1E4] transition-colors disabled:opacity-50 capitalize"
+                        >
+                          Confirm: {entry.entry_type?.replace('_', ' ')}
+                        </button>
+                        {entry.classifier_label && (
+                          <button
+                            onClick={() => handleResolve(entry.id, entry.classifier_label)}
+                            disabled={resolvingId === entry.id}
+                            className="text-xs text-[#1F3D2B] underline disabled:opacity-50 capitalize"
+                          >
+                            Actually: {entry.classifier_label.replace('_', ' ')}
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { getInsights } from '../api/client';
-import { TrendingUp, AlertTriangle, Users, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { useToast } from '../components/Toast';
+import { getInsights, getModelStatus, retrainModel } from '../api/client';
+import { TrendingUp, AlertTriangle, Users, CheckCircle2, ShieldCheck, Loader2, RefreshCw } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -11,16 +12,37 @@ const STATUS_COLORS = { overdue: '#A6543A', upcoming: '#5B7B8C', completed: '#2a
 const REVIEW_COLOR = '#b45309';
 
 function Insights() {
+  const showToast = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [modelStatus, setModelStatus] = useState(null);
+  const [retraining, setRetraining] = useState(false);
+  const [retrainResult, setRetrainResult] = useState(null);
 
   useEffect(() => {
     getInsights()
       .then(setData)
       .catch(() => setError('Could not load insights data. Is the backend running?'))
       .finally(() => setLoading(false));
+
+    getModelStatus().then(setModelStatus).catch(() => setModelStatus({ reachable: false }));
   }, []);
+
+  const handleRetrain = async () => {
+    setRetraining(true);
+    setRetrainResult(null);
+    try {
+      const result = await retrainModel();
+      setRetrainResult(result);
+      showToast('Classifier retrained and hot-swapped — no restart needed.', 'success');
+      getModelStatus().then(setModelStatus).catch(() => {});
+    } catch (err) {
+      showToast(err.message || 'Retrain failed. Is the classifier service running?', 'error');
+    } finally {
+      setRetraining(false);
+    }
+  };
 
   const topScopeCreepClient = data?.scopeCreepByClient?.[0];
 
@@ -113,6 +135,34 @@ function Insights() {
                   <p className="text-xs text-[#6b6355] mt-1">{data.classifierAgreementSampleSize} live extractions checked</p>
                 )}
               </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 mb-6">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h2 className="text-lg text-[#1F3D2B] mb-1" style={{ fontFamily: 'Fraunces' }}>Classifier training</h2>
+                  <p className="text-xs text-[#6b6355]">
+                    {modelStatus?.reachable === false
+                      ? 'Classifier service not reachable locally.'
+                      : `${modelStatus?.feedback_count ?? 0} resolved review${modelStatus?.feedback_count === 1 ? '' : 's'} collected as new training examples since the last retrain.`}
+                  </p>
+                </div>
+                <button
+                  onClick={handleRetrain}
+                  disabled={retraining || modelStatus?.reachable === false}
+                  className="shrink-0 flex items-center gap-2 text-xs bg-[#1F3D2B] hover:bg-[#16301F] disabled:opacity-50 text-[#F6F1E4] rounded-lg px-3 py-2 transition-colors"
+                >
+                  {retraining ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                  {retraining ? 'Retraining...' : 'Retrain classifier'}
+                </button>
+              </div>
+
+              {retrainResult && (
+                <p className="text-xs text-[#2a4d38] bg-[#F6F1E4] rounded-lg px-3 py-2 mt-3">
+                  Retrained on {retrainResult.total_training_examples} examples ({retrainResult.feedback_examples_included} from resolved reviews)
+                  {retrainResult.holdout_accuracy !== null && `, ${Math.round(retrainResult.holdout_accuracy * 100)}% holdout accuracy`}.
+                </p>
+              )}
             </div>
 
             <div className="bg-white rounded-2xl border border-[#e8e1cf] p-6 mb-6">
